@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Luz - Vidente</title>
+    <!-- Incluir o script oficial do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Estilos Globais e Cores (Místico e Harmonioso) */
         :root {
-            --bg-color: #0d0b18; /* Azul-noite profundo */
-            --card-bg: #161224; /* Fundo dos comentários */
-            --accent-gold: #dfb76c; /* Dourado místico */
-            --text-light: #f5f5f7; /* Branco suave */
-            --text-muted: #a09cb0; /* Texto secundário */
-            --admin-color: #8a2be2; /* Roxo para destacar o admin */
-            --danger-color: #ff4d4d; /* Vermelho para apagar */
+            --bg-color: #0d0b18;
+            --card-bg: #161224;
+            --accent-gold: #dfb76c;
+            --text-light: #f5f5f7;
+            --text-muted: #a09cb0;
+            --admin-color: #8a2be2;
+            --danger-color: #ff4d4d;
         }
 
         * {
@@ -34,7 +35,6 @@
             position: relative;
         }
 
-        /* Efeito de Estrelas de Fundo */
         body::before {
             content: "";
             position: absolute;
@@ -51,7 +51,6 @@
             z-index: -1;
         }
 
-        /* Área de Login Secreta do Admin (Fica no topo direito) */
         .admin-zone {
             position: absolute;
             top: 20px;
@@ -87,7 +86,6 @@
             color: var(--bg-color);
         }
 
-        /* Cabeçalho / Boas-Vindas */
         header {
             text-align: center;
             padding: 80px 20px 40px 20px;
@@ -125,7 +123,6 @@
             font-style: italic;
         }
 
-        /* Linha Divisória Elegante */
         .divider {
             width: 100px;
             height: 1px;
@@ -133,7 +130,6 @@
             margin: 30px auto;
         }
 
-        /* Seção Principal */
         main {
             width: 100%;
             max-width: 650px;
@@ -158,7 +154,6 @@
             text-transform: uppercase;
         }
 
-        /* Formulários */
         .comment-form {
             background-color: var(--card-bg);
             border: 1px solid rgba(223, 183, 108, 0.15);
@@ -205,17 +200,12 @@
             border-color: var(--accent-gold);
         }
 
-        /* Opções do Admin ao postar */
         .admin-post-options {
             display: none;
             margin-top: 10px;
             gap: 15px;
             align-items: center;
             font-size: 0.9rem;
-        }
-
-        .admin-post-options input {
-            cursor: pointer;
         }
 
         .btn-submit {
@@ -237,7 +227,6 @@
             transform: translateY(-1px);
         }
 
-        /* Mural de Mensagens */
         .comments-display-title {
             font-size: 1.2rem;
             margin-bottom: 20px;
@@ -264,7 +253,6 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
 
-        /* Estilo especial se o comentário for do Admin */
         .comment-card.admin-reply {
             border-left-color: var(--admin-color);
             background: linear-gradient(to right, #1a1530, var(--card-bg));
@@ -291,7 +279,6 @@
             font-weight: bold;
         }
 
-        /* Botão de Apagar do Admin */
         .btn-delete {
             display: none;
             background: transparent;
@@ -350,9 +337,7 @@
         </div>
 
         <div class="comment-form">
-            <h3 class="form-title" id="formTitle">
-                Partilhe o que sente (Envio Anónimo)
-            </h3>
+            <h3 class="form-title" id="formTitle">Partilhe o que sente (Envio Anónimo)</h3>
             <form id="oracleForm">
                 <textarea id="commentInput" placeholder="Escreva aqui a sua mensagem, pergunta ou reflexão..." required></textarea>
                 
@@ -367,14 +352,19 @@
         </div>
 
         <h3 class="comments-display-title">Mensagens Deixadas</h3>
-        <div id="commentsList" class="comments-list">
-            </div>
+        <div id="commentsList" class="comments-list"></div>
     </main>
 
     <script>
-        // PALAVRA-PASSE ATUALIZADA AQUI:
+        // CONFIGURAÇÕES ATUALIZADAS
         const ADMIN_PASSWORD = "CarlaSILVAvidente1234"; 
         
+        const SUPABASE_URL = "https://sipstahbhlfcuhxfxqxv.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_UeBsK5lIPVdg4NV35VQZ8A_GznsoBHu";
+
+        // Inicializar o cliente do Supabase
+        const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         let isAdminActive = false;
 
         const form = document.getElementById('oracleForm');
@@ -388,7 +378,6 @@
 
         document.addEventListener('DOMContentLoaded', loadComments);
 
-        // Função para Ligar / Desligar o modo Administrador
         function toggleAdmin() {
             if (!isAdminActive) {
                 if (adminPasswordInput.value === ADMIN_PASSWORD) {
@@ -401,10 +390,9 @@
                     formTitle.innerHTML = 'Área de Escrita <span class="admin-badge">Modo Vidente Ativo</span>';
                     updateAdminElements();
                 } else {
-                    alert("Senha incorreta, tente novamente.");
+                    alert("Senha incorreta.");
                 }
             } else {
-                // Fazer Logout de Admin
                 isAdminActive = false;
                 adminBtn.textContent = "Entrar Admin";
                 adminBtn.style.background = "transparent";
@@ -418,7 +406,6 @@
             }
         }
 
-        // Mostra ou esconde os botões de apagar com base no login
         function updateAdminElements() {
             const deleteButtons = document.querySelectorAll('.btn-delete');
             deleteButtons.forEach(btn => {
@@ -426,46 +413,47 @@
             });
         }
 
-        // Submissão do formulário
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const text = commentInput.value.trim();
             if (!text) return;
 
             const isOfficialReply = isAdminActive && postAsAdminCheckbox.checked;
+            const dateStr = new Date().toLocaleDateString('pt-PT', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
 
-            const newComment = {
-                id: Date.now(),
-                text: text,
-                isAdminComment: isOfficialReply,
-                date: new Date().toLocaleDateString('pt-PT', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                })
-            };
+            // Inserir diretamente na tabela do teu Supabase
+            const { data, error } = await supabase
+                .from('comments')
+                .insert([{ text: text, is_admin_comment: isOfficialReply, date: dateStr }])
+                .select();
 
-            saveComment(newComment);
-            appendCommentHTML(newComment);
+            if (error) {
+                alert("Erro ao enviar mensagem: " + error.message);
+                return;
+            }
+
+            if(data && data[0]) {
+                appendCommentHTML(data[0]);
+            }
             
             commentInput.value = '';
             postAsAdminCheckbox.checked = false;
         });
 
-        // Adicionar Comentário no Ecrã
         function appendCommentHTML(comment) {
             const noCommentsMsg = document.querySelector('.no-comments');
             if (noCommentsMsg) noCommentsMsg.remove();
 
             const card = document.createElement('div');
-            card.className = `comment-card ${comment.isAdminComment ? 'admin-reply' : ''}`;
+            card.className = `comment-card ${comment.is_admin_comment ? 'admin-reply' : ''}`;
             card.setAttribute('data-id', comment.id);
             
-            const displayName = comment.isAdminComment ? '✨ A Vidente (Oficial)' : 'A Alma Anónima';
-            const nameClass = comment.isAdminComment ? 'meta-name admin-text' : 'meta-name';
+            const displayName = comment.is_admin_comment ? '✨ A Vidente (Oficial)' : 'A Alma Anónima';
+            const nameClass = comment.is_admin_comment ? 'meta-name admin-text' : 'meta-name';
 
             card.innerHTML = `
                 <p class="comment-text">${escapeHTML(comment.text)}</p>
@@ -483,42 +471,47 @@
             }
         }
 
-        // Função para o Admin Apagar Mensagens
-        function deleteComment(id) {
+        async function deleteComment(id) {
             if (!isAdminActive) return;
             
-            if (confirm("Tens a certeza que desejas apagar esta mensagem do universo?")) {
-                let comments = JSON.parse(localStorage.getItem('portal_comments')) || [];
-                comments = comments.filter(c => c.id !== id);
-                localStorage.setItem('portal_comments', JSON.stringify(comments));
+            if (confirm("Desejas apagar esta mensagem permanentemente?")) {
+                const { error } = await supabase
+                    .from('comments')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert("Erro ao apagar: " + error.message);
+                    return;
+                }
                 
                 const card = document.querySelector(`[data-id="${id}"]`);
                 if (card) card.remove();
 
-                if (comments.length === 0) {
+                if (commentsList.children.length === 0) {
                     commentsList.innerHTML = '<p class="no-comments">O silêncio impera... Seja a primeira pessoa a deixar uma mensagem.</p>';
                 }
             }
         }
 
-        // Guardar no LocalStorage
-        function saveComment(comment) {
-            let comments = JSON.parse(localStorage.getItem('portal_comments')) || [];
-            comments.push(comment);
-            localStorage.setItem('portal_comments', JSON.stringify(comments));
-        }
-
-        // Carregar as mensagens ao iniciar
-        function loadComments() {
-            let comments = JSON.parse(localStorage.getItem('portal_comments')) || [];
+        async function loadComments() {
             commentsList.innerHTML = '';
             
-            if (comments.length === 0) {
+            const { data: comments, error } = await supabase
+                .from('comments')
+                .select('*')
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                console.error("Erro ao carregar:", error.message);
+                return;
+            }
+            
+            if (!comments || comments.length === 0) {
                 commentsList.innerHTML = '<p class="no-comments">O silêncio impera... Seja a primeira pessoa a deixar uma mensagem.</p>';
                 return;
             }
 
-            comments.sort((a, b) => a.id - b.id);
             comments.forEach(comment => appendCommentHTML(comment));
         }
 
