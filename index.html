@@ -15,6 +15,7 @@
             --text-light: #f5f5f7;
             --text-muted: #a09cb0;
             --admin-color: #8a2be2;
+            --danger-color: #ff4d4d;
         }
 
         * {
@@ -258,6 +259,23 @@
             font-weight: bold;
         }
 
+        .btn-delete {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
         .no-comments {
             text-align: center;
             color: var(--text-muted);
@@ -313,7 +331,6 @@
         const SUPABASE_URL = "https://sipstahbhlfcuhxfxqxv.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_UeBsK5lIPVdg4NV35VQZ8A_GznsoBHu";
 
-        // Inicialização global corrigida da biblioteca
         const { createClient } = supabase;
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -328,7 +345,6 @@
         const postAsAdminCheckbox = document.getElementById('postAsAdmin');
         const formTitle = document.getElementById('formTitle');
 
-        // Carregar comentários mal a página abra
         document.addEventListener('DOMContentLoaded', loadComments);
 
         function toggleAdmin() {
@@ -342,6 +358,7 @@
                     adminPasswordInput.style.display = "none";
                     adminPostOptions.style.display = "flex";
                     formTitle.innerHTML = 'Área de Escrita <span class="admin-badge">Modo Vidente Ativo</span>';
+                    updateDeleteButtons();
                 } else {
                     alert("Senha incorreta.");
                 }
@@ -355,7 +372,15 @@
                 adminPostOptions.style.display = "none";
                 postAsAdminCheckbox.checked = false;
                 formTitle.innerHTML = 'Partilhe o que sente (Envio Anónimo)';
+                updateDeleteButtons();
             }
+        }
+
+        function updateDeleteButtons() {
+            const buttons = document.querySelectorAll('.btn-delete');
+            buttons.forEach(btn => {
+                btn.style.display = isAdminActive ? "block" : "none";
+            });
         }
 
         form.addEventListener('submit', async function(e) {
@@ -370,7 +395,6 @@
                 hour: '2-digit', minute: '2-digit'
             });
 
-            // Enviar para o banco de dados
             const { data, error } = await supabaseClient
                 .from('comments')
                 .insert([{ text: text, is_admin_comment: isOfficialReply, date: dateStr }])
@@ -395,6 +419,7 @@
 
             const card = document.createElement('div');
             card.className = `comment-card ${comment.is_admin_comment ? 'admin-reply' : ''}`;
+            card.setAttribute('data-id', comment.id);
             
             const displayName = comment.is_admin_comment ? '✨ A Vidente (Oficial)' : 'A Alma Anónima';
             const nameClass = comment.is_admin_comment ? 'meta-name admin-text' : 'meta-name';
@@ -404,10 +429,39 @@
                 <div class="comment-meta">
                     <span class="${nameClass}">${displayName}</span>
                     <span>${comment.date}</span>
+                    <button class="btn-delete" onclick="deleteComment(${comment.id})">Apagar</button>
                 </div>
             `;
             
             commentsList.insertBefore(card, commentsList.firstChild);
+            
+            // Se o admin já estiver logado, mostra logo o botão neste novo comentário
+            if (isAdminActive) {
+                card.querySelector('.btn-delete').style.display = "block";
+            }
+        }
+
+        async function deleteComment(id) {
+            if (!isAdminActive) return;
+            
+            if (confirm("Deseja apagar esta mensagem permanentemente do mural?")) {
+                const { error } = await supabaseClient
+                    .from('comments')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert("Erro ao apagar: " + error.message);
+                    return;
+                }
+                
+                const card = document.querySelector(`[data-id="${id}"]`);
+                if (card) card.remove();
+
+                if (commentsList.children.length === 0) {
+                    commentsList.innerHTML = '<p class="no-comments">O silêncio impera... Seja a primeira pessoa a deixar uma mensagem.</p>';
+                }
+            }
         }
 
         async function loadComments() {
