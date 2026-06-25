@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Luz - Vidente</title>
-    <!-- Incluir o script oficial do Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -356,14 +355,17 @@
     </main>
 
     <script>
-        // CONFIGURAÇÕES ATUALIZADAS
         const ADMIN_PASSWORD = "CarlaSILVAvidente1234"; 
-        
         const SUPABASE_URL = "https://sipstahbhlfcuhxfxqxv.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_UeBsK5lIPVdg4NV35VQZ8A_GznsoBHu";
 
-        // Inicializar o cliente do Supabase
-        const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Inicializar com tratamento de erro nativo
+        let supabase;
+        try {
+            supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (err) {
+            alert("Erro crítico ao carregar o Supabase: " + err.message);
+        }
 
         let isAdminActive = false;
 
@@ -376,7 +378,9 @@
         const postAsAdminCheckbox = document.getElementById('postAsAdmin');
         const formTitle = document.getElementById('formTitle');
 
-        document.addEventListener('DOMContentLoaded', loadComments);
+        if (supabase) {
+            document.addEventListener('DOMContentLoaded', loadComments);
+        }
 
         function toggleAdmin() {
             if (!isAdminActive) {
@@ -415,6 +419,7 @@
 
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
+            if (!supabase) return alert("Supabase não inicializado.");
             
             const text = commentInput.value.trim();
             if (!text) return;
@@ -425,14 +430,13 @@
                 hour: '2-digit', minute: '2-digit'
             });
 
-            // Inserir diretamente na tabela do teu Supabase
             const { data, error } = await supabase
                 .from('comments')
                 .insert([{ text: text, is_admin_comment: isOfficialReply, date: dateStr }])
                 .select();
 
             if (error) {
-                alert("Erro ao enviar mensagem: " + error.message);
+                alert("Erro da Base de Dados (Supabase): " + error.message + "\nDetalhe: " + error.details);
                 return;
             }
 
@@ -472,7 +476,7 @@
         }
 
         async function deleteComment(id) {
-            if (!isAdminActive) return;
+            if (!isAdminActive || !supabase) return;
             
             if (confirm("Desejas apagar esta mensagem permanentemente?")) {
                 const { error } = await supabase
@@ -495,6 +499,7 @@
         }
 
         async function loadComments() {
+            if (!supabase) return;
             commentsList.innerHTML = '';
             
             const { data: comments, error } = await supabase
@@ -503,7 +508,7 @@
                 .order('created_at', { ascending: true });
 
             if (error) {
-                console.error("Erro ao carregar:", error.message);
+                alert("Erro ao carregar comentários do banco de dados: " + error.message);
                 return;
             }
             
