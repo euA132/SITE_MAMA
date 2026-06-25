@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Luz - Vidente</title>
+    <style>
+        /* Estilos Globais e Cores (Místico e Harmonioso) */
+        :root {
+            --bg-color: #0d0b18; /* Azul-noite profundo */
+            --card-bg: #161224; /* Fundo dos comentários */
+            --accent-gold: #dfb76c; /* Dourado místico */
+            --text-light: #f5f5f7; /* Branco suave */
+            --text-muted: #a09cb0; /* Texto secundário */
+            --admin-color: #8a2be2; /* Roxo para destacar o admin */
+            --danger-color: #ff4d4d; /* Vermelho para apagar */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Efeito de Estrelas de Fundo */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px);
+            background-size: 550px 550px, 350px 350px;
+            background-position: 0 0, 40px 60px;
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        /* Área de Login Secreta do Admin (Fica no topo direito) */
+        .admin-zone {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .admin-input {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(223, 183, 108, 0.3);
+            border-radius: 4px;
+            padding: 5px 10px;
+            color: white;
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .btn-admin {
+            background: transparent;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .btn-admin:hover {
+            background: var(--accent-gold);
+            color: var(--bg-color);
+        }
+
+        /* Cabeçalho / Boas-Vindas */
+        header {
+            text-align: center;
+            padding: 80px 20px 40px 20px;
+            max-width: 800px;
+        }
+
+        .portal-icon {
+            font-size: 3rem;
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--text-light);
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        h1 span {
+            color: var(--accent-gold);
+            display: block;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .welcome-phrase {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        /* Linha Divisória Elegante */
+        .divider {
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--accent-gold), transparent);
+            margin: 30px auto;
+        }
+
+        /* Seção Principal */
+        main {
+            width: 100%;
+            max-width: 650px;
+            padding: 0 20px 60px 20px;
+        }
+
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            background: transparent;
+            border: none;
+            color: var(--accent-gold);
+            font-size: 1.1rem;
+            padding: 10px 20px;
+            border-bottom: 2px solid var(--accent-gold);
+            cursor: default;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Formulários */
+        .comment-form {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(223, 183, 108, 0.15);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-title {
+            font-size: 1.1rem;
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+            font-weight: 400;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-badge {
+            background: var(--admin-color);
+            color: white;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            background-color: rgba(13, 11, 24, 0.7);
+            border: 1px solid rgba(223, 183, 108, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            color: var(--text-light);
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-gold);
+        }
+
+        /* Opções do Admin ao postar */
+        .admin-post-options {
+            display: none;
+            margin-top: 10px;
+            gap: 15px;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .admin-post-options input {
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #dfb76c, #b88e3d);
+            color: #0d0b18;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+            transition: transform 0.2s ease, opacity 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Mural de Mensagens */
+        .comments-display-title {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            letter-spacing: 1px;
+            font-weight: 400;
+            border-left: 3px solid var(--accent-gold);
+            padding-left: 10px;
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .comment-card {
+            background-color: var(--card-bg);
+            border-left: 3px solid var(--accent-gold);
+            border-radius: 0 12px 12px 0;
+            padding: 20px;
+            position: relative;
+            animation: fadeIn 0.5s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Estilo especial se o comentário for do Admin */
+        .comment-card.admin-reply {
+            border-left-color: var(--admin-color);
+            background: linear-gradient(to right, #1a1530, var(--card-bg));
+        }
+
+        .comment-text {
+            color: var(--text-light);
+            line-height: 1.5;
+            font-size: 1rem;
+            word-wrap: break-word;
+        }
+
+        .comment-meta {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .meta-name.admin-text {
+            color: var(--admin-color);
+            font-weight: bold;
+        }
+
+        /* Botão de Apagar do Admin */
+        .btn-delete {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .no-comments {
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 30px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-zone">
+        <input type="password" id="adminPassword" class="admin-input" placeholder="Senha do Admin">
+        <button id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Entrar Admin</button>
+    </div>
+
+    <header>
+        <div class="portal-icon">✦</div>
+        <h1>Portal do Destino <span>Abra as portas ao seu caminho</span></h1>
+        <div class="divider"></div>
+        <p class="welcome-phrase">
+            "O universo não cruza caminhos por acaso. Deixe aqui as suas dúvidas, os seus desabafos ou a sua energia, e permita que a luz guie as respostas que procura."
+        </p>
+    </header>
+
+    <main>
+        <div class="tab-container">
+            <button class="tab-button">Mural de Mensagens</button>
+        </div>
+
+        <div class="comment-form">
+            <h3 class="form-title" id="formTitle">
+                Partilhe o que sente (Envio Anónimo)
+            </h3>
+            <form id="oracleForm">
+                <textarea id="commentInput" placeholder="Escreva aqui a sua mensagem, pergunta ou reflexão..." required></textarea>
+                
+                <div class="admin-post-options" id="adminPostOptions">
+                    <label style="cursor: pointer;">
+                        <input type="checkbox" id="postAsAdmin"> Postar com selo oficial de Vidente
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">Enviar ao Universo</button>
+            </form>
+        </div>
+
+        <h3 class="comments-display-title">Mensagens Deixadas</h3>
+        <div id="commentsList" class="comments-list">
+            </div>
+    </main>
+
+    <script>
+        // PALAVRA-PASSE ATUALIZADA AQUI:
+        const ADMIN_PASSWORD = "CarlaSILVAvidente1234"; 
+        
+        let isAdminActive = false;
+
+        const form = document.getElementById('oracleForm');
+        const commentInput = document.getElementById('commentInput');
+        const commentsList = document.getElementById('commentsList');
+        const adminPasswordInput = document.getElementById('adminPassword');
+        const adminBtn = document.getElementById('adminBtn');
+        const adminPostOptions = document.getElementById('adminPostOptions');
+        const postAsAdminCheckbox = document.getElementById('postAsAdmin');
+        const formTitle = document.getElementById('formTitle');
+
+        document.addEventListener('DOMContentLoaded', loadComments);
+
+        // Função para Ligar / Desligar o modo Administrador
+        function toggleAdmin() {
+            if (!isAdminActive) {
+                if (adminPasswordInput.value === ADMIN_PASSWORD) {
+                    isAdminActive = true;
+                    adminBtn.textContent = "Sair Admin";
+                    adminBtn.style.background = "#8a2be2";
+                    adminBtn.style.color = "white";
+                    adminPasswordInput.style.display = "none";
+                    adminPostOptions.style.display = "flex";
+                    formTitle.innerHTML = 'Área de Escrita <span class="admin-badge">Modo Vidente Ativo</span>';
+                    updateAdminElements();
+                } else {
+                    alert("Senha incorreta, tente novamente.");
+                }
+            } else {
+                // Fazer Logout de Admin
+                isAdminActive = false;
+                adminBtn.textContent = "Entrar Admin";
+                adminBtn.style.background = "transparent";
+                adminBtn.style.color = "var(--accent-gold)";
+                adminPasswordInput.value = "";
+                adminPasswordInput.style.display = "block";
+                adminPostOptions.style.display = "none";
+                postAsAdminCheckbox.checked = false;
+                formTitle.innerHTML = 'Partilhe o que sente (Envio Anónimo)';
+                updateAdminElements();
+            }
+        }
+
+        // Mostra ou esconde os botões de apagar com base no login
+        function updateAdminElements() {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(btn => {
+                btn.style.display = isAdminActive ? "block" : "none";
+            });
+        }
+
+        // Submissão do formulário
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const text = commentInput.value.trim();
+            if (!text) return;
+
+            const isOfficialReply = isAdminActive && postAsAdminCheckbox.checked;
+
+            const newComment = {
+                id: Date.now(),
+                text: text,
+                isAdminComment: isOfficialReply,
+                date: new Date().toLocaleDateString('pt-PT', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+            };
+
+            saveComment(newComment);
+            appendCommentHTML(newComment);
+            
+            commentInput.value = '';
+            postAsAdminCheckbox.checked = false;
+        });
+
+        // Adicionar Comentário no Ecrã
+        function appendCommentHTML(comment) {
+            const noCommentsMsg = document.querySelector('.no-comments');
+            if (noCommentsMsg) noCommentsMsg.remove();
+
+            const card = document.createElement('div');
+            card.className = `comment-card ${comment.isAdminComment ? 'admin-reply' : ''}`;
+            card.setAttribute('data-id', comment.id);
+            
+            const displayName = comment.isAdminComment ? '✨ A Vidente (Oficial)' : 'A Alma Anónima';
+            const nameClass = comment.isAdminComment ? 'meta-name admin-text' : 'meta-name';
+
+            card.innerHTML = `
+                <p class="comment-text">${escapeHTML(comment.text)}</p>
+                <div class="comment-meta">
+                    <span class="${nameClass}">${displayName}</span>
+                    <span>${comment.date}</span>
+                    <button class="btn-delete" onclick="deleteComment(${comment.id})">Apagar</button>
+                </div>
+            `;
+            
+            commentsList.insertBefore(card, commentsList.firstChild);
+            
+            if (isAdminActive) {
+                card.querySelector('.btn-delete').style.display = "block";
+            }
+        }
+
+        // Função para o Admin Apagar Mensagens
+        function deleteComment(id) {
+            if (!isAdminActive) return;
+            
+            if (confirm("Tens a certeza que desejas apagar esta mensagem do universo?")) {
+                let comments = JSON.parse(localStorage.getItem('portal_comments')) || [];
+                comments = comments.filter(c => c.id !== id);
+                localStorage.setItem('portal_comments', JSON.stringify(comments));
+                
+                const card = document.querySelector(`[data-id="${id}"]`);
+                if (card) card.remove();
+
+                if (comments.length === 0) {
+                    commentsList.innerHTML = '<p class="no-comments">O silêncio impera... Seja a primeira pessoa a deixar uma mensagem.</p>';
+                }
+            }
+        }
+
+        // Guardar no LocalStorage
+        function saveComment(comment) {
+            let comments = JSON.parse(localStorage.getItem('portal_comments')) || [];
+            comments.push(comment);
+            localStorage.setItem('portal_comments', JSON.stringify(comments));
+        }
+
+        // Carregar as mensagens ao iniciar
+        function loadComments() {
+            let comments = JSON.parse(localStorage.getItem('portal_comments')) || [];
+            commentsList.innerHTML = '';
+            
+            if (comments.length === 0) {
+                commentsList.innerHTML = '<p class="no-comments">O silêncio impera... Seja a primeira pessoa a deixar uma mensagem.</p>';
+                return;
+            }
+
+            comments.sort((a, b) => a.id - b.id);
+            comments.forEach(comment => appendCommentHTML(comment));
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+    </script>
+</body>
+</html>
